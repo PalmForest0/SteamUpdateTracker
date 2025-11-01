@@ -83,11 +83,16 @@ public class Program
         string contents = latestPatch.GetProperty("contents").GetString();
         long unixTime = latestPatch.GetProperty("date").GetInt64();
 
-        string message = Utility.BBCodeToMarkdown($"{(string.IsNullOrWhiteSpace(prefix) ? "" : $"{prefix}\n")}# [{title}]({url})\n\n{contents}\n\n**Released on** <t:{unixTime}:f> (<t:{unixTime}:R>)");
+        string message = Utility.BBCodeToMarkdown($"{(string.IsNullOrWhiteSpace(prefix) ? "" : $"{prefix}\n")}# {title}\n[url]{url}[/url]\n\n{contents}\n\nReleased on <t:{unixTime}:f> (<t:{unixTime}:R>)");
 
         foreach (var chunk in Utility.SplitString(message, 2000))
         {
-            var payload = JsonSerializer.Serialize(new { content = chunk });
+            var payload = JsonSerializer.Serialize(new
+            {
+                content = chunk,
+                flags = 4
+            });
+
             var response = await http.PostAsync(webhookUrl, new StringContent(payload, Encoding.UTF8, "application/json"));
             response.EnsureSuccessStatusCode();
         }
