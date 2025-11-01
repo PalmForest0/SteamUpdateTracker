@@ -79,10 +79,11 @@ public class Program
     private static async Task SendMessage(HttpClient http, string webhookUrl, JsonElement latestPatch, string prefix)
     {
         string title = latestPatch.GetProperty("title").GetString();
+        string url = latestPatch.GetProperty("url").GetString();
         string contents = latestPatch.GetProperty("contents").GetString();
         long unixTime = latestPatch.GetProperty("date").GetInt64();
 
-        string message = Utility.BBCodeToMarkdown($"{(string.IsNullOrWhiteSpace(prefix) ? "" : $"{prefix}\n")}# {title}\n{contents}\n**Date:** <t:{unixTime}:f> (<t:{unixTime}:R>)");
+        string message = Utility.BBCodeToMarkdown($"{(string.IsNullOrWhiteSpace(prefix) ? "" : $"{prefix}\n")}# [{title}]({url})\n\n{contents}\n\n**Released on** <t:{unixTime}:f> (<t:{unixTime}:R>)");
 
         foreach (var chunk in Utility.SplitString(message, 2000))
         {
