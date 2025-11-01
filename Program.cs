@@ -84,7 +84,7 @@ public class Program
 
         var payload = JsonSerializer.Serialize(new
         {
-            content = $"{(string.IsNullOrWhiteSpace(prefix) ? "" : $"{prefix}\n")}# {title}\n{contents}\n**Date:** <t:{unixTime}:f> (<t:{unixTime}:R>)\r\n"
+            content = $"{(string.IsNullOrWhiteSpace(prefix) ? "" : $"{prefix}\n")}# {title}\n{contents}\n**Date:** <t:{unixTime}:f> (<t:{unixTime}:R>)"
         });
 
         var response = await http.PostAsync(webhookUrl, new StringContent(payload, Encoding.UTF8, "application/json"));
