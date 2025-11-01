@@ -82,14 +82,20 @@ public class Program
         string contents = latestPatch.GetProperty("contents").GetString();
         long unixTime = latestPatch.GetProperty("date").GetInt64();
 
-        var payload = JsonSerializer.Serialize(new
-        {
-            content = $"{(string.IsNullOrWhiteSpace(prefix) ? "" : $"{prefix}\n")}# {title}\n{contents}\n**Date:** <t:{unixTime}:f> (<t:{unixTime}:R>)"
-        });
+        string message = $"{(string.IsNullOrWhiteSpace(prefix) ? "" : $"{prefix}\n")}# {title}\n{contents}\n**Date:** <t:{unixTime}:f> (<t:{unixTime}:R>)";
 
-        var response = await http.PostAsync(webhookUrl, new StringContent(payload, Encoding.UTF8, "application/json"));
-        response.EnsureSuccessStatusCode();
+        foreach (var chunk in SplitString(message, 2000))
+        {
+            var payload = JsonSerializer.Serialize(new { content = chunk });
+            var response = await http.PostAsync(webhookUrl, new StringContent(payload, Encoding.UTF8, "application/json"));
+            response.EnsureSuccessStatusCode();
+        }
 
         Console.WriteLine($"Posted update: {title}");
     }
+
+    private static List<string> SplitString(string str, int messageSize) => Enumerable
+        .Range(0, (str.Length + messageSize - 1) / messageSize)
+        .Select(i => str.Substring(i * messageSize, Math.Min(messageSize, str.Length - i * messageSize)))
+        .ToList();
 }
