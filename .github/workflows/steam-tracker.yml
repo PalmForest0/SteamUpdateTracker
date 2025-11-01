@@ -1,0 +1,22 @@
+name: Steam Update Tracker
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+    env:
+      STEAM_APPID: ${{ vars.STEAM_APPID }}
+      WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+      GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+      GIST_ID: ${{ secrets.GIST_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run Steam Tracker
+        run: dotnet run --project SteamUpdateTracker
