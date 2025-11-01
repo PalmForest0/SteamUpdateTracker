@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       STEAM_APPID: ${{ vars.STEAM_APPID }}
+      MESSAGE_PREFIX: ${{ vars.MESSAGE_PREFIX }}
       WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
       GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
       GIST_ID: ${{ secrets.GIST_ID }}
