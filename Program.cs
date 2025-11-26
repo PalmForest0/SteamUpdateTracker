@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace SteamUpdateTracker;
 
-public class Program
+public static class Program
 {
     public static string UserAgent { get; } = $"{nameof(SteamUpdateTracker)}/1.0";
 
@@ -32,7 +32,7 @@ public class Program
         string lastPatchGid = await GetLastPatchGid(http, gistId, gistToken);
         string newGid = latest.GetProperty("gid").GetString();
 
-        if (newGid != lastPatchGid)
+        if (newGid != lastPatchGid && !latest.GetProperty("feedname").ValueEquals("PC Gamer"))
         {
             await SendMessage(http, webhookUrl, latest, prefix);
             await UpdateLastPatchGid(http, gistId, gistToken, newGid);
@@ -78,12 +78,20 @@ public class Program
 
     private static async Task SendMessage(HttpClient http, string webhookUrl, JsonElement latestPatch, string prefix)
     {
-        string title = latestPatch.GetProperty("title").GetString();
-        string url = latestPatch.GetProperty("url").GetString();
-        string contents = latestPatch.GetProperty("contents").GetString();
+        string title = latestPatch.GetProperty("title").GetString().Trim();
+        string url = latestPatch.GetProperty("url").GetString().Trim();
+        string contents = latestPatch.GetProperty("contents").GetString().Trim();
+        string author = latestPatch.GetProperty("author").GetString().Trim();
         long unixTime = latestPatch.GetProperty("date").GetInt64();
 
-        string message = Utility.BBCodeToMarkdown($"{(string.IsNullOrWhiteSpace(prefix) ? "" : $"{prefix}\n")}# {title}\n[url]{url}[/url]\n\n{contents}\n\nReleased on <t:{unixTime}:f> (<t:{unixTime}:R>)");
+        string message = $"""
+        {prefix}
+        # {title}
+        **Published by *{author}* on <t:{unixTime}:f> (<t:{unixTime}:R>)**
+        **{url}**
+
+        {Utility.BBCodeToMarkdown(contents).Trim()}
+        """;
 
         foreach (var chunk in Utility.SplitString(message, 2000))
         {
